@@ -63,9 +63,9 @@ export const DataProvider = ({ children, loadData = true }: { children: ReactNod
     };
 
     return (
-        <DataContext value={{ userData, loading, loadFirebaseUserData, uploadFirebaseUserData }}>
+        <DataContext.Provider value={{ userData, loading, loadFirebaseUserData, uploadFirebaseUserData }}>
             {children}
-        </DataContext>
+        </DataContext.Provider>
     )
 };
 
