@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
+import { auth, db } from '../firebase';
 import './App.css'
+import { collection, getDocs } from 'firebase/firestore';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -29,6 +31,12 @@ function App() {
         Click on the Vite and React logos to learn more
       </p>
       <div className='mt-5 text-amber-400'>Testing tailwind</div>
+      <button onClick={() => console.log(auth.currentUser)}>asjdlfkajsdlf</button>
+      <button onClick={() => {
+        getDocs(collection(db, 'users')).then((value) => {
+            console.log(value.docs.map(doc => doc.data()));
+        }).catch((err) => console.log(err));
+      }}>whats in db</button>
     </>
   )
 }
