@@ -39,11 +39,12 @@ export const DataProvider = ({ children, loadData = true }: { children: ReactNod
 
     // Loads the user data into userData and returns a promise of whether or not successful
     const loadFirebaseUserData: () => Promise<boolean> = () => {
+        console.log('loading')
         setLoading(true);
         return getDocs(collection(db, 'users'))
             .then((value) => {
                 const data = value.docs.map(doc => doc.data());
-                // console.log(data);
+                console.log(data);
                 setUserData(data);
                 return true;
             })
@@ -68,3 +69,4 @@ export const DataProvider = ({ children, loadData = true }: { children: ReactNod
     )
 };
 
+export default DataContext;
