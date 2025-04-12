@@ -1,35 +1,44 @@
-import { useState } from 'react'
-import { auth, db, login } from '../firebase';
+// import { useState } from 'react'
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import './App.css'
-import { collection, getDocs } from 'firebase/firestore';
+import Results from './pages/Results';
+import EnergyForm from './pages/EnergyForm';
+import { useContext } from 'react';
+import AuthContext from './context/AuthContext';
+import { DataProvider } from './context/DataContext';
 
 function App() {
-  const [count, setCount] = useState(0)
+    // const [count, setCount] = useState(0)
 
-  return (
-    <>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-      <div className='mt-5 text-amber-400'>Testing tailwind</div>
-      <button onClick={() => console.log(auth.currentUser)}>Who am i</button>
-      <button onClick={login}>Login</button>
-      <button onClick={() => {
-        getDocs(collection(db, 'users')).then((value) => {
-            console.log(value.docs.map(doc => doc.data()));
-        }).catch((err) => console.log(err));
-      }}>whats in db</button>
-    </>
-  )
+    const navigate = useNavigate();
+    const { user, login, logout } = useContext(AuthContext);
+    const location = useLocation();
+    const shouldLoadUserData = location.pathname === '/results';
+
+    return (
+        <>
+            <h1>Title</h1>
+            <>
+                <div>
+                    <div className='mt-5 text-amber-400'>Testing tailwind</div>
+                    <button onClick={() => console.log(user)}>Who am i</button>
+                    <button onClick={login}>Login</button>
+                    <button onClick={logout}>Logout</button>
+
+                </div>
+
+                <button onClick={() => navigate('/')}>Home</button>
+                <button onClick={() => navigate('/results')}>Results</button>
+            </>
+            <DataProvider loadData={shouldLoadUserData}>
+                <Routes>
+                    <Route index element={<EnergyForm />} />
+                    <Route path='results' element={<Results />} />
+                    <Route path='/*' element={<Navigate to='/' />} />
+                </Routes>
+            </DataProvider>
+        </>
+    )
 }
 
 export default App
