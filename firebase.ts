@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 // import { getAnalytics } from "firebase/analytics";
-import { getAuth } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -24,5 +24,28 @@ const app = initializeApp(firebaseConfig);
 // const analytics = getAnalytics(app);
 const db = getFirestore(app);
 const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+export const login = () => {
+    signInWithPopup(auth, provider).then((user) => {
+        console.log(user.user.email);
+    }).catch((err) => {
+        console.error(err);
+    })
+};
+
+export const logout = () => {
+    signOut(auth).catch((err) => console.error(err));
+};
+
+// TODO: Database-related functions to have:
+//  - for a given user, write energy graph
+//      - (x, y) points
+//      - date
+//  - for a given user, read all previous writes
+// Firebase structure
+//  users/{user_id}/graphs/{graph_id}: list
+//      - points: array<string: "{x}_{y}"> 
+//      - timestamp: timestamp
 
 export { auth, db };
