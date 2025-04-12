@@ -16,11 +16,10 @@ function App() {
     const shouldLoadUserData = location.pathname === '/results';
 
     return (
-        <>
-            <h1>Title</h1>
-            <>
+        <div className='min-h-screen w-full flex flex-col text-center items-center justify-center'>
+            <div className='w-100 grow'>
+                {/* Header */}
                 <div>
-                    <div className='mt-5 text-amber-400'>Testing tailwind</div>
                     <button onClick={() => console.log(user)}>Who am i</button>
                     <button onClick={login}>Login</button>
                     <button onClick={logout}>Logout</button>
@@ -29,7 +28,7 @@ function App() {
 
                 <button onClick={() => navigate('/')}>Home</button>
                 <button onClick={() => navigate('/results')}>Results</button>
-            </>
+            </div>
             <DataProvider loadData={shouldLoadUserData}>
                 <Routes>
                     <Route index element={<EnergyForm />} />
@@ -37,7 +36,7 @@ function App() {
                     <Route path='/*' element={<Navigate to='/' />} />
                 </Routes>
             </DataProvider>
-        </>
+        </div>
     )
 }
 

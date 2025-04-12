@@ -1,6 +1,11 @@
+import Plot from "../components/Plot";
+
 function EnergyForm() {
     return (
-        <div>EnergyForm</div>
+        <div>
+            <h1>Energy Graph</h1>
+            <Plot />
+        </div>
     );
 }
 
