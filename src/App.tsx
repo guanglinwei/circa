@@ -1,6 +1,4 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import { auth, db, login } from '../firebase';
 import './App.css'
 import { collection, getDocs } from 'firebase/firestore';
