@@ -12,11 +12,12 @@ function Starting() {
 
   // If user is logged in and auth state has finished loading, redirect
   useEffect(() => {
+    // if (!user) setPageVisible(true);
     if (!loading && user) {
         setPageVisible(false);
         setTimeout(() => {
             navigate("/home");
-
+            setPageVisible(true);
         }, 500)
     }
   }, [user, loading, navigate]);
