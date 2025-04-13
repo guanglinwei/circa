@@ -22,7 +22,7 @@ function App() {
     const shouldLoadUserData = true;//location.pathname === '/results';
 
     return (
-        <div className='h-screen w-full flex flex-col text-center items-center justify-center'>
+        <div className='min-h-[100dvh] w-full flex flex-col text-center items-center justify-center'>
             
             <Header />
 
