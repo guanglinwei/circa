@@ -6,7 +6,7 @@ import EnergyForm from './pages/EnergyForm';
 import Starting from './pages/Starting';
 import Add from './pages/Add';
 import Account from './pages/Account';
-import Header from './components/header';
+import Header from './components/Header';
 // import { useContext } from 'react';
 // import AuthContext from './context/AuthContext';
 import { DataProvider } from './context/DataContext';

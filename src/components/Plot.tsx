@@ -1,10 +1,11 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { Axis, LineSeries, XYChart } from "@visx/xychart";
+import { AnimatedLineSeries, Axis, XYChart } from "@visx/xychart";
 import { Drag } from "@visx/drag";
 import { Circle } from "@visx/shape";
 import { curveMonotoneX } from "@visx/curve";
 import DataContext from "../context/DataContext";
 import { getAveragePoints } from "../utils/energyMetrics";
+import Tooltip from "./ui/Tooltip";
 
 export type Point = { x: number; y: number; };
 
@@ -176,14 +177,98 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
         setPoints((old) => old.filter((_, i) => i !== index));
     };
 
+    type RGB = {
+        r: number;
+        g: number;
+        b: number;
+    }
+    const lerpRGB = (col1: RGB, col2: RGB, t: number) => {
+        const res = col1;
+        // if (Math.abs(t - 0.5) < deadzone / 2) {
+        //     t = 0.5;
+        // }
+        res.r = Math.round(col1.r + (col2.r - col1.r) * t);
+        res.g = Math.round(col1.g + (col2.g - col1.g) * t);
+        res.b = Math.round(col1.b + (col2.b - col1.b) * t);
+
+        return res;
+    };
+
+    const lerpThreeRGB = (col1: RGB, col2: RGB, col3: RGB, t: number) => {
+        if (t <= 0.5) {
+            return lerpRGB(col1, col2, t * 2);
+        }
+        else {
+            return lerpRGB(col2, col3, (t - 0.5) * 2);
+        }
+    };
+
+    const rgbToHex = (col: RGB) => {
+        const toHex = (c: number) => {
+            const hex = c.toString(16);
+            return hex.length === 1 ? "0" + hex : hex;
+        };
+
+        return "#" + toHex(col.r) + toHex(col.g) + toHex(col.b);
+    };
+
     return (
         <>
-            <button className='rounded-md bg-gray-200 px-2 cursor-pointer' onClick={() => {
+            <button className='rounded-md bg-[#F2F1F0] px-2 cursor-pointer mx-1' onClick={() => {
                 deleteAllGraphs?.();
             }}>Delete my data</button>
-            <button className='rounded-md bg-gray-200 px-2 cursor-pointer' onClick={() => {
+            <button className='rounded-md bg-[#F2F1F0] px-2 cursor-pointer mx-1' onClick={() => {
                 uploadPointsToDB();
             }}>UPLOAD</button>
+
+            <div className='mt-2'>
+                <Tooltip content={(
+                    <div className="pr-6 pl-2 text-left flex">
+                        <div className="flex flex-col w-40">
+                            <div className='my-1'>
+                                <img className='inline-block' src='/circa/lmb.svg' height={20} width={20} />
+                                <b className="font-semibold">+ Drag</b>
+                            </div>
+                            <div className='my-1'>
+                                <img className='inline-block' src='/circa/lmb.svg' height={20} width={20} />
+                                <img className='inline-block' src='/circa/lmb.svg' height={20} width={20} />
+                                <b className="font-semibold"> (Double Click)</b>
+                            </div>
+                            <div className='my-1'>
+                                <img className='inline-block' src='/circa/rmb.svg' height={20} width={20} />
+                                <b className="font-semibold"> (Right Click)</b>
+                            </div>
+                        </div>
+                        <div className="flex flex-col w-24">
+                            <div className="my-[14px] mt-[16px]"><hr className="w-16"/></div>
+                            <div className="my-[15px]"><hr className="w-16"/></div>
+                            <div className="my-[14px]"><hr className="w-16"/></div>
+                        </div>
+                        <div className="flex flex-col">
+                            <div className="ml-7 my-[5px] font-semibold">Move</div>
+                            <div className="ml-7 my-[5px] font-semibold">Add</div>
+                            <div className="ml-7 my-[5px] font-semibold">Remove</div>
+                        </div>
+                        {/* <div className="m-1 flex">
+                            <img className='inline-block' src='public/lmb.svg' height={20} width={20} /> 
+                            <b className="font-semibold">+ Drag</b>: move points
+                        </div>
+                        <div className="m-1 flex">
+                            <img className='inline-block' src='public/lmb.svg' height={20} width={20} /> 
+                            <img className='inline-block' src='public/lmb.svg' height={20} width={20} />: Add point
+                        </div>
+                        <div className="m-1 flex">
+                            <img className='inline-block' src='public/rmb.svg' height={20} width={20} />: Remove point
+                        </div> */}
+                    </div>
+                )}>
+                    <div className='select-none flex justify-center items-center align-middle rounded-md bg-[#F2F1F0] px-2 py-1'>
+                        <span>Usage</span>
+                        <img className='ml-2 inline-block pt-0.5' src='/circa/question.svg' height={16} width={16} />
+                    </div>
+                </Tooltip>
+            </div>
+
             <div className='select-none' onDoubleClick={handleDoubleClick}>
                 <XYChart
                     height={HEIGHT}
@@ -192,15 +277,25 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
                     yScale={{ type: 'linear', domain: Y_RANGE }}
                     captureEvents={false}
                 >
-                    <Axis orientation='bottom' />
-                    <Axis orientation='left' />
-                    <LineSeries
+                    <defs>
+                        <filter id="glow" x="-200%" y="-200%" width="600%" height="600%">
+                            <feGaussianBlur stdDeviation="5" result="coloredBlur" />
+                            <feMerge>
+                                <feMergeNode in="coloredBlur" />
+                                <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <Axis orientation='bottom' label='Time of Day' />
+                    <Axis orientation='left' label='Energy Level' />
+                    <AnimatedLineSeries
                         dataKey='Line'
                         data={points}
                         {...accessors}
-                        curve={curveMonotoneX} />
+                        curve={curveMonotoneX}
+                    />
 
-                    <LineSeries
+                    <AnimatedLineSeries
                         dataKey='AvgLine'
                         data={averagePoints}
                         {...accessors}
@@ -249,7 +344,12 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
                                         cx={xPos}
                                         cy={yPos}
                                         r={isDragging ? 8 : 6}
-                                        fill={isDragging ? 'blue' : 'blue'}
+                                        // fill={isDragging ? 'blue' : 'blue'}
+                                        fill={rgbToHex(lerpThreeRGB(
+                                            { r: 162, g: 215, b: 216 },
+                                            { r: 180, g: 177, b: 171 },
+                                            { r: 222, g: 88, b: 66 },
+                                            newY / Y_DIST))}
                                         onMouseMove={dragMove}
                                         onMouseUp={dragEnd}
                                         onContextMenu={(e) => { handleRightClick(e, i) }}
@@ -257,7 +357,9 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
                                         onTouchStart={dragStart}
                                         onTouchMove={dragMove}
                                         onTouchEnd={dragEnd}
-                                    />
+                                        // style={{ transition: 'fill 0.1s ease-in-out' }}
+                                        filter='url(#glow)'
+                                    ></Circle>
                                 );
                             }}
                         </Drag>
