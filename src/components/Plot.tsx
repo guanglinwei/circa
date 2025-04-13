@@ -470,7 +470,7 @@ function Plot({
             <Button
                 variant="default"
                 className="rounded-md px-2 cursor-pointer mt-3 w-50"
-                style={{ fontFamily: "Jacques Francois" }}
+                // style={{ fontFamily: "Jacques Francois" }}
                 onClick={() => {
                     uploadPointsToDB();
                 }}
