@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { Axis, LineSeries, XYChart } from "@visx/xychart";
+import { AnimatedLineSeries, Axis, XYChart } from "@visx/xychart";
 import { Drag } from "@visx/drag";
 import { Circle } from "@visx/shape";
 import { curveMonotoneX } from "@visx/curve";
@@ -194,13 +194,14 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
                 >
                     <Axis orientation='bottom' />
                     <Axis orientation='left' />
-                    <LineSeries
+                    <AnimatedLineSeries
                         dataKey='Line'
                         data={points}
                         {...accessors}
-                        curve={curveMonotoneX} />
+                        curve={curveMonotoneX}
+                         />
 
-                    <LineSeries
+                    <AnimatedLineSeries
                         dataKey='AvgLine'
                         data={averagePoints}
                         {...accessors}
