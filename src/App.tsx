@@ -1,12 +1,12 @@
 // import { useState } from 'react'
-import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import './App.css'
 import Results from './pages/Results';
 import EnergyForm from './pages/EnergyForm';
 import Starting from './pages/Starting';
 import Add from './pages/Add';
-import { useContext } from 'react';
-import AuthContext from './context/AuthContext';
+// import { useContext } from 'react';
+// import AuthContext from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
 
 
@@ -14,8 +14,8 @@ import { DataProvider } from './context/DataContext';
 function App() {
     // const [count, setCount] = useState(0)
 
-    const navigate = useNavigate();
-    const { user, login, logout } = useContext(AuthContext);
+    // const navigate = useNavigate();
+    // const { user, login, logout } = useContext(AuthContext);
     // const location = useLocation();
     const shouldLoadUserData = true;//location.pathname === '/results';
 
