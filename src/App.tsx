@@ -4,6 +4,7 @@ import './App.css'
 import Results from './pages/Results';
 import EnergyForm from './pages/EnergyForm';
 import Starting from './pages/Starting';
+import Add from './pages/Add';
 import { useContext } from 'react';
 import AuthContext from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
@@ -24,6 +25,7 @@ function App() {
             <DataProvider loadData={shouldLoadUserData}>
                 <Routes>
                     <Route index element={<Starting />} />
+                    <Route path='add' element={<Add />} />
                     <Route path='home' element={<EnergyForm />} />
                     <Route path='results' element={<Results />} />
                     <Route path='/*' element={<Navigate to='/' />} />
