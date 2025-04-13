@@ -94,6 +94,7 @@ function Account() {
             </div>
           </CardContent>
           <CardFooter className="flex justify-between items-center w-full">
+            <Button variant= "outline">Back</Button>
   <Button variant="destructive">Delete Data</Button>
   <Button className="">Sign Out</Button>
 </CardFooter>
