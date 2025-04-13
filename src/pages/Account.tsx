@@ -47,6 +47,7 @@ function Account({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { user, logout } = useContext(AuthContext);
   const { deleteAllGraphs, userData, loadFirebaseUserData } =
     useContext(DataContext);
+console.log("userData", userData);
   const [deleting, setDeleting] = useState(false);
   const [deleteButtonUsable, setDeleteButtonUsable] = useState(true);
 
@@ -210,6 +211,7 @@ function Account({ open, onClose }: { open: boolean; onClose: () => void }) {
         </Button>
       </Tabs>
     </div>
+    
   );
 }
 
