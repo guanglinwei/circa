@@ -23,7 +23,7 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
         { x: X_RANGE[1], y: Y_RANGE[0] + Math.round(Y_DIST / 2) }
     ]);
 
-    const { userData, deleteAllGraphs } = useContext(DataContext);
+    const { userData } = useContext(DataContext);
     const [averagePoints, setAveragePoints] = useState<Point[]>([]);
     const [currentHoverIndex, setCurrentHoverIndex] = useState<number | null>(null);
     // const prevDate = useRef<Date | null>(null);
@@ -216,9 +216,9 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
 
     return (
         <>
-            {/* <button className='rounded-md bg-[#F2F1F0] px-2 cursor-pointer mx-1' onClick={() => {
+            <button className='rounded-md bg-[#F2F1F0] px-2 cursor-pointer mx-1' onClick={() => {
                 uploadPointsToDB();
-            }}>UPLOAD</button> */}
+            }}>UPLOAD</button>
 
             <div className='-mt-3'>
                 <Tooltip content={(
