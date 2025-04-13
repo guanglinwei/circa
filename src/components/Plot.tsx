@@ -7,6 +7,7 @@ import DataContext from "../context/DataContext";
 import { getAveragePoints } from "../utils/energyMetrics";
 import Tooltip from "./ui/Tooltip";
 import { Button } from "./ui/button";
+import { CircleHelp } from "lucide-react";
 
 export type Point = { x: number; y: number };
 
@@ -338,21 +339,13 @@ function Plot({
             </div>
           }
         >
-          <div className="select-none flex justify-center items-center align-middle rounded-md bg-[#F2F1F0] px-2 py-1">
-            <span
-              style={{
-                fontFamily: "'Jacques Francois', serif",
-              }}
-            >
-              Usage
-            </span>
-            <img
-              className="ml-2 inline-block pt-0.5"
-              src="/circa/question.svg"
-              height={16}
-              width={16}
-            />
-          </div>
+          <Button
+            variant="outline"
+            className="select-none flex justify-center items-center align-middle rounded-md  px-2 py-1"
+          >
+            Instructions
+            <CircleHelp />
+          </Button>
         </Tooltip>
       </div>
 
@@ -472,11 +465,16 @@ function Plot({
             </Drag>
           ))}
         </XYChart>
-        
       </div>
-      <Button variant = "outline"className='rounded-md px-2 cursor-pointer mt-3 w-50' onClick={() => {
-                uploadPointsToDB();
-            }}>UPLOAD</Button>
+      <Button
+        variant="default"
+        className="rounded-md px-2 cursor-pointer mt-3 w-50"
+        onClick={() => {
+          uploadPointsToDB();
+        }}
+      >
+        UPLOAD
+      </Button>
     </>
   );
 }

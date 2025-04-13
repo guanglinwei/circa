@@ -1,43 +1,49 @@
 // import { useState } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom';
-import './App.css'
-import Results from './pages/Results';
-import EnergyForm from './pages/EnergyForm';
-import Starting from './pages/Starting';
-import Add from './pages/Add';
-import Account from './pages/Account';
-import Header from './components/Header';
+import { Navigate, Route, Routes } from "react-router-dom";
+import "./App.css";
+import Results from "./pages/Results";
+import EnergyForm from "./pages/EnergyForm";
+import Starting from "./pages/Starting";
+import Add from "./pages/Add";
+import Header from "./components/Header";
+import { Toaster } from "sonner";
 // import { useContext } from 'react';
 // import AuthContext from './context/AuthContext';
-import { DataProvider } from './context/DataContext';
+import { DataProvider } from "./context/DataContext";
 
+import { useState } from "react";
 
+import AccountDialog from "./components/AccountDialog";
 
 function App() {
-    // const [count, setCount] = useState(0)
+  // const [count, setCount] = useState(0)
 
-    // const navigate = useNavigate();
-    // const { user, login, logout } = useContext(AuthContext);
-    // const location = useLocation();
-    const shouldLoadUserData = true;//location.pathname === '/results';
+  // const navigate = useNavigate();
+  // const { user, login, logout } = useContext(AuthContext);
+  // const location = useLocation();
+  const shouldLoadUserData = true; //location.pathname === '/results';
+  const [showAccountDialog, setShowAccountDialog] = useState(false);
 
-    return (
-        <div className='min-h-screen w-full flex flex-col text-center items-center justify-center'>
-            
-            <Header />
+  return (
+    <div className="min-h-screen w-full flex flex-col text-center items-center justify-center">
+      <Header onAvatarClick={() => setShowAccountDialog(true)} />
+      <AccountDialog
+        open={showAccountDialog}
+        onOpenChange={setShowAccountDialog}
+      />
 
-            <DataProvider loadData={shouldLoadUserData}>
-                <Routes>
-                    <Route index element={<Starting />} />
-                    <Route path='add' element={<Add />} />
-                    <Route path='account' element={<Account />} />
-                    <Route path='home' element={<EnergyForm />} />
-                    <Route path='results' element={<Results />} />
-                    <Route path='/*' element={<Navigate to='/' />} />
-                </Routes>
-            </DataProvider>
-        </div>
-    )
+      <DataProvider loadData={shouldLoadUserData}>
+        <Routes>
+          <Route index element={<Starting />} />
+          <Route path="add" element={<Add />} />
+          <Route path="home" element={<EnergyForm />} />
+          <Route path="results" element={<Results />} />
+          <Route path="/*" element={<Navigate to="/" />} />
+        </Routes>
+        <Toaster richColors />
+      </DataProvider>
+    </div>
+  );
 }
 
 // {/* <div className='w-100 grow'> {/* Header */}
@@ -52,4 +58,4 @@ function App() {
 //                 <button onClick={() => navigate('/results')}>Results</button>
 //             </div> */}
 
-export default App
+export default App;
