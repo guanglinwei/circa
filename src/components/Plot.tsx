@@ -249,7 +249,7 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
                                         cx={xPos}
                                         cy={yPos}
                                         r={isDragging ? 8 : 6}
-                                        fill={isDragging ? 'orange' : 'red'}
+                                        fill={isDragging ? 'blue' : 'blue'}
                                         onMouseMove={dragMove}
                                         onMouseUp={dragEnd}
                                         onContextMenu={(e) => { handleRightClick(e, i) }}
