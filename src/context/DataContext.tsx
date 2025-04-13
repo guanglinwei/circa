@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDocs, getFirestore, query, setDoc, Timestamp, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, getFirestore, query, setDoc, Timestamp, where } from "firebase/firestore";
 import { app } from "../../firebase";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import AuthContext from "./AuthContext";
@@ -23,8 +23,9 @@ const DataContext = createContext<{
     loading: boolean,
     loadFirebaseUserData: (() => Promise<boolean>) | null,
     uploadEnergyGraph: ((points: Point[], currDate: Date, replace?: boolean, alwaysAddNew?: boolean) => Promise<boolean>) | null,
-    getGraphForDate: ((date: Date) => Promise<GraphData | null>) | null
-}>({ userData: [], loading: false, loadFirebaseUserData: null, uploadEnergyGraph: null, getGraphForDate: null });
+    getGraphForDate: ((date: Date) => Promise<GraphData | null>) | null,
+    deleteAllGraphs: (() => Promise<unknown>) | null,
+}>({ userData: [], loading: false, loadFirebaseUserData: null, uploadEnergyGraph: null, getGraphForDate: null, deleteAllGraphs: null });
 
 export const DataProvider = ({ children, loadData = true }: { children: ReactNode, loadData: boolean }) => {
     const [userData, setUserData] = useState<GraphData[]>([]);
@@ -149,8 +150,20 @@ export const DataProvider = ({ children, loadData = true }: { children: ReactNod
             }
         };
 
+    const deleteAllGraphs = async () => {
+        if (!user) return new Promise(() => false);
+
+        const colRef = collection(db, 'users', user?.uid, 'graphs');
+        const snapshot = await getDocs(colRef);
+        const dels = snapshot.docs.map((document) => {
+            deleteDoc(doc(db, 'users', user.uid, 'graphs', document.id));
+        });
+
+        return Promise.all(dels).finally(() => { loadFirebaseUserData().then(() => setLoading(false)) });
+    };
+
     return (
-        <DataContext.Provider value={{ userData, loading, loadFirebaseUserData, uploadEnergyGraph, getGraphForDate }}>
+        <DataContext.Provider value={{ userData, loading, loadFirebaseUserData, uploadEnergyGraph, getGraphForDate, deleteAllGraphs }}>
             {children}
         </DataContext.Provider>
     )

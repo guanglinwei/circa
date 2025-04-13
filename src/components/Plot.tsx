@@ -22,7 +22,7 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
         { x: X_RANGE[1], y: Y_RANGE[0] + Math.round(Y_DIST / 2) }
     ]);
 
-    const { userData, loadFirebaseUserData, } = useContext(DataContext);
+    const { userData, deleteAllGraphs } = useContext(DataContext);
     const [averagePoints, setAveragePoints] = useState<Point[]>([]);
     // const prevDate = useRef<Date | null>(null);
 
@@ -57,27 +57,6 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
     const dragOffset = useRef<{ x: number, y: number }>({ x: 0, y: 0 });
 
     const { uploadEnergyGraph } = useContext(DataContext);
-
-    // useEffect(() => {
-    //     if (lastSavedPoints.current.length !== points.length) {
-    //         console.log('Saving...');
-    //         uploadPointsToDB();
-    //         return;
-    //     }
-    //     if (lastSavedPoints.current.length === points.length) {
-    //         for (let i = 0; i < points.length; i++) {
-    //             if (lastSavedPoints.current[i].x !== points[i].x ||
-    //                 lastSavedPoints.current[i].y !== points[i].y
-    //             ) {
-    //                 console.log('Saving...');
-    //                 uploadPointsToDB();
-    //                 return;
-    //             }
-    //         }
-    //     }
-
-    //     // return () => { uploadPointsToDB(); clearInterval(interval) };
-    // }, [points]);
 
     const getClosestValidXCoord = (x: number, okIndex: number | undefined = undefined): number => {
         if (okIndex === 0) return 0;
@@ -200,8 +179,8 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
     return (
         <>
             <button onClick={() => {
-                console.log(points)
-            }}>print State</button>
+                deleteAllGraphs?.();
+            }}>Delete my data</button>
             <button onClick={() => {
                 uploadPointsToDB();
             }}>UPLOAD</button>
