@@ -26,6 +26,7 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
     const { userData } = useContext(DataContext);
     const [averagePoints, setAveragePoints] = useState<Point[]>([]);
     const [currentHoverIndex, setCurrentHoverIndex] = useState<number | null>(null);
+    const [width, setWidth] = useState(WIDTH);
     // const prevDate = useRef<Date | null>(null);
 
     // useEffect(() => {
@@ -39,8 +40,24 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
     //     console.log(prevDate.current);
     // }, [currDate]);
 
+    const getWidth = () => {
+        const w = window.innerWidth;
+        if (w < 640) return 300;
+        if (w < 768) return 400;
+        if (w < 1024) return 600;
+        return 800;
+    };
+    
     useEffect(() => {
-        console.log(userData);
+        const handleResize = () => setWidth(getWidth());
+        window.addEventListener('resize', handleResize);
+        handleResize();
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
+    useEffect(() => {
         setAveragePoints(getAveragePoints(userData.map((v) => v.points).flat()))
     }, [userData]);
 
@@ -78,7 +95,7 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
         final: boolean = true, wasDragged: boolean = false) => {
         if (x === undefined || y === undefined) return;
 
-        const newX = X_DIST * (x + dx - margin.left) / (WIDTH - margin.left - margin.right);
+        const newX = X_DIST * (x + dx - margin.left) / (width - margin.left - margin.right);
         const newY = -Y_DIST * (y + dy - HEIGHT + margin.bottom) / (HEIGHT - margin.top - margin.bottom);
         let clampedX = Math.max(X_RANGE[0], Math.min(X_RANGE[1], newX));
         let clampedY = Math.max(Y_RANGE[0], Math.min(Y_RANGE[1], newY));
@@ -140,7 +157,7 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
 
         if (!svgPoint) return;
 
-        const newX = X_DIST * (svgPoint.x - margin.left) / (WIDTH - margin.left - margin.right);
+        const newX = X_DIST * (svgPoint.x - margin.left) / (width - margin.left - margin.right);
         const newY = -Y_DIST * (svgPoint.y - HEIGHT + margin.bottom) / (HEIGHT - margin.top - margin.bottom);
         let clampedX = Math.round(Math.max(X_RANGE[0], Math.min(X_RANGE[1], newX)));
         let clampedY = Math.round(Math.max(Y_RANGE[0], Math.min(Y_RANGE[1], newY)));
@@ -273,7 +290,7 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
             <div className='select-none' onDoubleClick={handleDoubleClick}>
                 <XYChart
                     height={HEIGHT}
-                    width={WIDTH}
+                    width={width}
                     xScale={{ type: 'linear', domain: X_RANGE }}
                     yScale={{ type: 'linear', domain: Y_RANGE }}
                     captureEvents={false}
@@ -308,21 +325,21 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
                             key={i}
                             x={point.x}
                             y={point.y}
-                            width={WIDTH}
+                            width={width}
                             height={HEIGHT}
                             onDragMove={({ x, y, dx, dy }) => updatePoint(i, x, y, dx, dy, false, true)}
                             onDragEnd={({ x, y, dx, dy }) => updatePoint(i, x, y, dx, dy, true, true)}
                             captureDragArea
                             restrict={{
                                 xMin: 0,
-                                xMax: WIDTH,
+                                xMax: width,
                                 yMin: 0,
                                 yMax: HEIGHT,
                             }}
                         >
                             {({ dragStart, dragEnd, dragMove, isDragging, dx, dy }) => {
                                 if (isDragging) {
-                                    dx = dx * X_DIST / (WIDTH - margin.left - margin.right);
+                                    dx = dx * X_DIST / (width - margin.left - margin.right);
                                     dy = dy * Y_DIST / (HEIGHT - margin.top - margin.bottom);
                                 } else {
                                     dx = 0;
@@ -333,7 +350,7 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
                                 }
                                 const newX = point.x + dx - (isDragging ? dragOffset.current.x : 0);
                                 const newY = point.y - dy + (isDragging ? dragOffset.current.y : 0);
-                                const xPos = (newX / X_DIST) * (WIDTH - margin.left - margin.right) + margin.left;
+                                const xPos = (newX / X_DIST) * (width - margin.left - margin.right) + margin.left;
                                 const yPos = HEIGHT - margin.bottom - newY * (HEIGHT - margin.top - margin.bottom) / Y_DIST;
 
                                 if (isDragging) {

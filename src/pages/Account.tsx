@@ -154,12 +154,12 @@ function Account() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {userData.map(({ points, created }, i) => (
+                            {userData.map(({ points, created }, i) => ( (i < 10) ?
                                 <TableRow key={i}>
                                     <TableCell className="font-medium text-left">{timestampToDate(created)}</TableCell>
                                     <TableCell className="text-left">{timestampToTime(created)}</TableCell>
                                     <TableCell className="text-right">{(points.reduce((sum, point) => sum + point.y, 0) / points.length).toFixed(2)}</TableCell>
-                                </TableRow>
+                                </TableRow> : <></>
                             ))}
                         </TableBody>
                         <TableFooter>

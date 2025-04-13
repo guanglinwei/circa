@@ -47,12 +47,10 @@ export const DataProvider = ({ children, loadData = true }: { children: ReactNod
     // Loads the user data into userData and returns a promise of whether or not successful
     const loadFirebaseUserData: () => Promise<boolean> = () => {
         if (!user) return new Promise(() => false);
-        console.log('loading')
         setLoading(true);
         return getDocs(collection(db, 'users', user.uid, 'graphs'))
             .then((value) => {
                 const data = value.docs.map(doc => doc.data() as GraphData);
-                console.log(data);
                 setUserData(data);
                 return true;
             })
