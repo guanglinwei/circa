@@ -10,7 +10,7 @@ import {
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -148,7 +148,7 @@ function Account() {
                         <TableCaption>A list of your recent energy levels.</TableCaption>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-40">Date <span className="text-gray-500 font-normal text-xs"> YYYY/MM/DD</span></TableHead>
+                                <TableHead className="w-40">Date</TableHead>
                                 <TableHead className="text-left">Time</TableHead>
                                 <TableHead className="text-right">Daily Average</TableHead>
                             </TableRow>
@@ -169,6 +169,10 @@ function Account() {
                     </Table>
 
                 </TabsContent>
+
+                <Link to="/" className="mt-5">
+                    <Button variant="outline" className="w-full cursor-pointer">Back</Button>
+                </Link>
             </Tabs>
         </div>
     );

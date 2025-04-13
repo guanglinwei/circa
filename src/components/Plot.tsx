@@ -216,14 +216,11 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
 
     return (
         <>
-            <button className='rounded-md bg-[#F2F1F0] px-2 cursor-pointer mx-1' onClick={() => {
-                deleteAllGraphs?.();
-            }}>Delete my data</button>
-            <button className='rounded-md bg-[#F2F1F0] px-2 cursor-pointer mx-1' onClick={() => {
+            {/* <button className='rounded-md bg-[#F2F1F0] px-2 cursor-pointer mx-1' onClick={() => {
                 uploadPointsToDB();
-            }}>UPLOAD</button>
+            }}>UPLOAD</button> */}
 
-            <div className='mt-2'>
+            <div className='-mt-3'>
                 <Tooltip content={(
                     <div className="pr-6 pl-2 text-left flex">
                         <div className="flex flex-col w-40">
@@ -265,7 +262,9 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
                     </div>
                 )}>
                     <div className='select-none flex justify-center items-center align-middle rounded-md bg-[#F2F1F0] px-2 py-1'>
-                        <span>Usage</span>
+                        <span style={{
+                            fontFamily: "'Jacques Francois', serif"
+                        }}>Usage</span>
                         <img className='ml-2 inline-block pt-0.5' src='/circa/question.svg' height={16} width={16} />
                     </div>
                 </Tooltip>

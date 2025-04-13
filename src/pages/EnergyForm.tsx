@@ -76,7 +76,9 @@ function EnergyForm() {
         <div className={`${(pageVisible && !!user) ? 'opacity-100' : 'opacity-0'} transition-opacity duration-700`}>
             <h1>{displayedText}</h1>
             <div className={`${(pageVisible && !!user) ? 'opacity-100' : 'opacity-0'} transition-opacity duration-700`}>
-                <div>How are you doing today?</div>
+                <div className="mt-2 text-lg text-muted-foreground" style={{
+                    fontFamily: "'Jacques Francois', serif"
+                }}>How are you doing today?</div>
                 <div className='m-2 p-2' style={{ display: 'none' }}>
                     {/* <span>🗓️ </span> */}
                     {/* <span>{now.toLocaleString(undefined, {
