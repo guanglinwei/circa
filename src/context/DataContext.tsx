@@ -22,7 +22,7 @@ const DataContext = createContext<{
     userData: GraphData[],
     loading: boolean,
     loadFirebaseUserData: (() => Promise<boolean>) | null,
-    uploadEnergyGraph: ((points: Point[], currDate: Date, replace?: boolean) => Promise<boolean>) | null,
+    uploadEnergyGraph: ((points: Point[], currDate: Date, replace?: boolean, alwaysAddNew?: boolean) => Promise<boolean>) | null,
     getGraphForDate: ((date: Date) => Promise<GraphData | null>) | null
 }>({ userData: [], loading: false, loadFirebaseUserData: null, uploadEnergyGraph: null, getGraphForDate: null });
 
@@ -99,8 +99,8 @@ export const DataProvider = ({ children, loadData = true }: { children: ReactNod
         }
     };
 
-    const uploadEnergyGraph: (points: Point[], currDate: Date, replace?: boolean) => Promise<boolean> =
-        async (points, currDate, replace = true) => {
+    const uploadEnergyGraph: (points: Point[], currDate: Date, replace?: boolean, alwaysAddNew?: boolean) => Promise<boolean> =
+        async (points, currDate, replace = true, alwaysAddNew = false) => {
             if (!user) return new Promise(() => false);
 
             const startOfDay = new Date(currDate);
@@ -117,9 +117,9 @@ export const DataProvider = ({ children, loadData = true }: { children: ReactNod
 
             setLoading(true);
             try {
-                console.log('Check if entry in this day exists')
+                // console.log('Check if entry in this day exists')
                 const querySnap = await getDocs(q);
-                if (querySnap.empty) {
+                if (alwaysAddNew || querySnap.empty) {
                     await addDoc(ref, {
                         points: points,
                         created: Timestamp.fromDate(currDate)
@@ -144,7 +144,8 @@ export const DataProvider = ({ children, loadData = true }: { children: ReactNod
                 return false
             }
             finally {
-                setLoading(false);
+                loadFirebaseUserData().then(() => setLoading(false));
+                // setLoading(false);
             }
         };
 

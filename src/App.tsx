@@ -12,8 +12,8 @@ function App() {
 
     const navigate = useNavigate();
     const { user, login, logout } = useContext(AuthContext);
-    const location = useLocation();
-    const shouldLoadUserData = location.pathname === '/results';
+    // const location = useLocation();
+    const shouldLoadUserData = true;//location.pathname === '/results';
 
     return (
         <div className='min-h-screen w-full flex flex-col text-center items-center justify-center'>

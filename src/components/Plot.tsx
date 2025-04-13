@@ -4,6 +4,7 @@ import { Drag } from "@visx/drag";
 import { Circle } from "@visx/shape";
 import { curveMonotoneX } from "@visx/curve";
 import DataContext from "../context/DataContext";
+import { getAveragePoints } from "../utils/energyMetrics";
 
 export type Point = { x: number; y: number; };
 
@@ -22,21 +23,23 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
     ]);
 
     const { userData, loadFirebaseUserData, } = useContext(DataContext);
-    const prevDate = useRef<Date | null>(null);
+    const [averagePoints, setAveragePoints] = useState<Point[]>([]);
+    // const prevDate = useRef<Date | null>(null);
+
+    // useEffect(() => {
+    //     console.log(prevDate.current, currDate)
+    //     if ((prevDate.current?.getTime() || 0) - (currDate?.getTime() || 0) <= 1000000) {
+    //         loadFirebaseUserData?.();
+    //         console.log('asdfasdf')
+    //     }
+
+    //     prevDate.current = currDate || null;
+    //     console.log(prevDate.current);
+    // }, [currDate]);
 
     useEffect(() => {
-        console.log(prevDate.current, currDate)
-        if ((prevDate.current?.getTime() || 0) - (currDate?.getTime() || 0) <= 1000000) {
-            loadFirebaseUserData?.();
-            console.log('asdfasdf')
-        }
-
-        prevDate.current = currDate || null;
-        console.log(prevDate.current);
-    }, [currDate]);
-
-    useEffect(() => {
-        
+        console.log(userData);
+        setAveragePoints(getAveragePoints(userData.map((v) => v.points).flat()))
     }, [userData]);
 
     const copyPointsArray = (pointsArr: Point[]): Point[] => {
@@ -55,26 +58,26 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
 
     const { uploadEnergyGraph } = useContext(DataContext);
 
-    useEffect(() => {
-        if (lastSavedPoints.current.length !== points.length) {
-            console.log('Saving...');
-            uploadPointsToDB();
-            return;
-        }
-        if (lastSavedPoints.current.length === points.length) {
-            for (let i = 0; i < points.length; i++) {
-                if (lastSavedPoints.current[i].x !== points[i].x ||
-                    lastSavedPoints.current[i].y !== points[i].y
-                ) {
-                    console.log('Saving...');
-                    uploadPointsToDB();
-                    return;
-                }
-            }
-        }
+    // useEffect(() => {
+    //     if (lastSavedPoints.current.length !== points.length) {
+    //         console.log('Saving...');
+    //         uploadPointsToDB();
+    //         return;
+    //     }
+    //     if (lastSavedPoints.current.length === points.length) {
+    //         for (let i = 0; i < points.length; i++) {
+    //             if (lastSavedPoints.current[i].x !== points[i].x ||
+    //                 lastSavedPoints.current[i].y !== points[i].y
+    //             ) {
+    //                 console.log('Saving...');
+    //                 uploadPointsToDB();
+    //                 return;
+    //             }
+    //         }
+    //     }
 
-        // return () => { uploadPointsToDB(); clearInterval(interval) };
-    }, [points]);
+    //     // return () => { uploadPointsToDB(); clearInterval(interval) };
+    // }, [points]);
 
     const getClosestValidXCoord = (x: number, okIndex: number | undefined = undefined): number => {
         if (okIndex === 0) return 0;
@@ -141,7 +144,7 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
         }
 
         lastSavedPoints.current = copyPointsArray(points);
-        uploadEnergyGraph?.(points, currDate || new Date());
+        uploadEnergyGraph?.(points, currDate || new Date(), true, true);
     };
 
     const handleDoubleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -215,6 +218,12 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
                     <LineSeries
                         dataKey='Line'
                         data={points}
+                        {...accessors}
+                        curve={curveMonotoneX} />
+
+                    <LineSeries
+                        dataKey='AvgLine'
+                        data={averagePoints}
                         {...accessors}
                         curve={curveMonotoneX} />
 

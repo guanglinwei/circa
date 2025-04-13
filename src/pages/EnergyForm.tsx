@@ -38,7 +38,7 @@ function EnergyForm() {
     return (
         <div>
             <h1>Energy Graph</h1>
-            <div className='m-2 p-2'>
+            <div className='m-2 p-2' style={{ display: 'none' }}>
                 {/* <span>🗓️ </span> */}
                 {/* <span>{now.toLocaleString(undefined, {
                     dateStyle: 'medium',
@@ -58,7 +58,8 @@ function EnergyForm() {
                 </div>
             </div>
             <p className={(!!errors ? 'visible' : 'invisible') + (' text-red-500 mb-1 font-semibold')}>{errors || '.'}</p>
-            <Plot currDate={new Date(selectedDate + 'T' + now.toISOString().split('T')[1])} setErrors={setErrors} />
+            <Plot setErrors={setErrors} />
+            {/* <Plot currDate={new Date(selectedDate + 'T' + now.toISOString().split('T')[1])} setErrors={setErrors} /> */}
         </div>
     );
 }
