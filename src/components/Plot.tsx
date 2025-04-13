@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { Axis, LineSeries, XYChart } from "@visx/xychart";
 import { Drag } from "@visx/drag";
 import { Circle } from "@visx/shape";
@@ -13,9 +13,13 @@ const margin = { top: 50, right: 50, bottom: 50, left: 50 };
 
 function Plot() {
     const [points, setPoints] = useState<Point[]>([
-        { x: 0, y: 5},
+        { x: 0, y: 5 },
         { x: 24, y: 5 }
     ]);
+
+    // Fixes weird bug where drag gets offset if dragged to invalid position
+    const wasDragging = useRef<boolean>(false);
+    const dragOffset = useRef<{ x: number, y: number }>({ x: 0, y: 0 });
 
     const { uploadEnergyGraph } = useContext(DataContext);
 
@@ -26,16 +30,17 @@ function Plot() {
         if (x === 0 && !points.some((v) => v.x === 1)) return 1;
         if (x === 24 && !points.some((v) => v.x === 23)) return 23;
         if (!points.some((v, i) => v.x === x && (i !== okIndex))) return x;
-        if (!points.some((v) => v.x === x - 1)) return x - 1;
-        if (!points.some((v) => v.x === x + 1)) return x + 1;
+        if (x !== 0 && !points.some((v) => v.x === x - 1)) return x - 1;
+        if (x !== 24 && !points.some((v) => v.x === x + 1)) return x + 1;
 
         return -1;
     };
 
     // 0, 0 | 24, 10 --> 50, 350 | 750, 50
-    const updatePoint = (index: number, x: number | undefined, y: number | undefined, dx: number, dy: number, final: boolean = true) => {
+    const updatePoint = (index: number, x: number | undefined, y: number | undefined, dx: number, dy: number,
+        final: boolean = true, wasDragged: boolean = false) => {
         if (x === undefined || y === undefined) return;
-        
+
         const newX = 24 * (x + dx - margin.left) / (WIDTH - margin.left - margin.right);
         const newY = -10 * (y + dy - HEIGHT + margin.bottom) / (HEIGHT - margin.top - margin.bottom);
         let clampedX = Math.max(0, Math.min(24, newX));
@@ -50,6 +55,10 @@ function Plot() {
         if (final) {
             updated.sort((a, b) => a.x - b.x);
             setPoints(updated);
+            if (wasDragged) {
+                wasDragging.current = false;
+                dragOffset.current = { x: 0, y: 0 };
+            }
         }
     };
 
@@ -144,8 +153,8 @@ function Plot() {
                             y={point.y}
                             width={WIDTH}
                             height={HEIGHT}
-                            onDragMove={({ x, y, dx, dy }) => updatePoint(i, x, y, dx, dy, false)}
-                            onDragEnd={({ x, y, dx, dy }) => updatePoint(i, x, y, dx, dy, true)}
+                            onDragMove={({ x, y, dx, dy }) => updatePoint(i, x, y, dx, dy, false, true)}
+                            onDragEnd={({ x, y, dx, dy }) => updatePoint(i, x, y, dx, dy, true, true)}
                             captureDragArea
                             restrict={{
                                 xMin: 0,
@@ -154,7 +163,7 @@ function Plot() {
                                 yMax: HEIGHT,
                             }}
                         >
-                            {({ x, y, dragStart, dragEnd, dragMove, isDragging, dx, dy }) => {
+                            {({ dragStart, dragEnd, dragMove, isDragging, dx, dy }) => {
                                 if (isDragging) {
                                     dx = dx * 24 / (WIDTH - margin.left - margin.right);
                                     dy = dy * 10 / (HEIGHT - margin.top - margin.bottom);
@@ -162,11 +171,17 @@ function Plot() {
                                     dx = 0;
                                     dy = 0;
                                 }
-                                console.log(x, y, '|', point.x, point.y, dx, dy)
-                                const newX = point.x + dx;
-                                const newY = point.y - dy;
+                                if (!wasDragging.current && isDragging) {
+                                    dragOffset.current = { x: dx, y: dy };
+                                }
+                                const newX = point.x + dx - (isDragging ? dragOffset.current.x : 0);
+                                const newY = point.y - dy + (isDragging ? dragOffset.current.y : 0);
                                 const xPos = (newX / 24) * (WIDTH - margin.left - margin.right) + margin.left;
                                 const yPos = HEIGHT - margin.bottom - newY * (HEIGHT - margin.top - margin.bottom) / 10;
+                                
+                                if (isDragging) {
+                                    wasDragging.current = isDragging;
+                                }
 
                                 return (
                                     <Circle
