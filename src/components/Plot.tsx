@@ -346,9 +346,9 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
                                         r={isDragging ? 8 : 6}
                                         // fill={isDragging ? 'blue' : 'blue'}
                                         fill={rgbToHex(lerpThreeRGB(
-                                            { r: 222, g: 88, b: 66 },
-                                            { r: 180, g: 177, b: 171 },
                                             { r: 162, g: 215, b: 216 },
+                                            { r: 180, g: 177, b: 171 },
+                                            { r: 222, g: 88, b: 66 },
                                             newY / Y_DIST))}
                                         onMouseMove={dragMove}
                                         onMouseUp={dragEnd}
