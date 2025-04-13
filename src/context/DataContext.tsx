@@ -34,6 +34,9 @@ export const DataProvider = ({ children, loadData = true }: { children: ReactNod
     const { user } = useContext(AuthContext);
 
     useEffect(() => {
+        console.log('HERE')
+        console.log(loadData)
+        console.log(user)
         if (!loadData) return;
         if (!user) {
             setUserData([]);
@@ -50,7 +53,9 @@ export const DataProvider = ({ children, loadData = true }: { children: ReactNod
         setLoading(true);
         return getDocs(collection(db, 'users', user.uid, 'graphs'))
             .then((value) => {
+                console.log(value)
                 const data = value.docs.map(doc => doc.data() as GraphData);
+                console.log('data, ', data)
                 setUserData(data);
                 return true;
             })

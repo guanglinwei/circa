@@ -16,34 +16,33 @@ import { useState } from "react";
 import AccountDialog from "./components/AccountDialog";
 
 function App() {
-  // const [count, setCount] = useState(0)
+    // const [count, setCount] = useState(0)
 
-  // const navigate = useNavigate();
-  // const { user, login, logout } = useContext(AuthContext);
-  // const location = useLocation();
-  const shouldLoadUserData = true; //location.pathname === '/results';
-  const [showAccountDialog, setShowAccountDialog] = useState(false);
+    // const navigate = useNavigate();
+    // const { user, login, logout } = useContext(AuthContext);
+    // const location = useLocation();
+    const shouldLoadUserData = true; //location.pathname === '/results';
+    const [showAccountDialog, setShowAccountDialog] = useState(false);
 
-  return (
-    <div className="min-h-screen w-full flex flex-col text-center items-center justify-center">
-      <Header onAvatarClick={() => setShowAccountDialog(true)} />
-      <AccountDialog
-        open={showAccountDialog}
-        onOpenChange={setShowAccountDialog}
-      />
-
-      <DataProvider loadData={shouldLoadUserData}>
-        <Routes>
-          <Route index element={<Starting />} />
-          <Route path="add" element={<Add />} />
-          <Route path="home" element={<EnergyForm />} />
-          <Route path="results" element={<Results />} />
-          <Route path="/*" element={<Navigate to="/" />} />
-        </Routes>
-        <Toaster richColors />
-      </DataProvider>
-    </div>
-  );
+    return (
+        <div className="min-h-screen w-full flex flex-col text-center items-center justify-center">
+            <DataProvider loadData={shouldLoadUserData}>
+                <Header onAvatarClick={() => setShowAccountDialog(true)} />
+                <AccountDialog
+                    open={showAccountDialog}
+                    onOpenChange={setShowAccountDialog}
+                />
+                <Routes>
+                    <Route index element={<Starting />} />
+                    <Route path="add" element={<Add />} />
+                    <Route path="home" element={<EnergyForm />} />
+                    <Route path="results" element={<Results />} />
+                    <Route path="/*" element={<Navigate to="/" />} />
+                </Routes>
+                <Toaster richColors />
+            </DataProvider>
+        </div>
+    );
 }
 
 // {/* <div className='w-100 grow'> {/* Header */}
