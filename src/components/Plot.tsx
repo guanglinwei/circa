@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Axis, LineSeries, XYChart } from "@visx/xychart";
 import { Drag } from "@visx/drag";
 import { Circle } from "@visx/shape";
@@ -10,12 +10,44 @@ export type Point = { x: number; y: number; };
 const WIDTH = 800;
 const HEIGHT = 400;
 const margin = { top: 50, right: 50, bottom: 50, left: 50 };
+const X_RANGE = [0, 24];
+const Y_RANGE = [0, 10];
+const X_DIST = X_RANGE[1] - X_RANGE[0];
+const Y_DIST = Y_RANGE[1] - Y_RANGE[0];
 
-function Plot() {
+function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currDate?: Date }) {
     const [points, setPoints] = useState<Point[]>([
-        { x: 0, y: 5 },
-        { x: 24, y: 5 }
+        { x: X_RANGE[0], y: Y_RANGE[0] + Math.round(Y_DIST / 2) },
+        { x: X_RANGE[1], y: Y_RANGE[0] + Math.round(Y_DIST / 2) }
     ]);
+
+    const { userData, loadFirebaseUserData, } = useContext(DataContext);
+    const prevDate = useRef<Date | null>(null);
+
+    useEffect(() => {
+        console.log(prevDate.current, currDate)
+        if ((prevDate.current?.getTime() || 0) - (currDate?.getTime() || 0) <= 1000000) {
+            loadFirebaseUserData?.();
+            console.log('asdfasdf')
+        }
+
+        prevDate.current = currDate || null;
+        console.log(prevDate.current);
+    }, [currDate]);
+
+    useEffect(() => {
+        
+    }, [userData]);
+
+    const copyPointsArray = (pointsArr: Point[]): Point[] => {
+        const res: Point[] = [];
+        for (const p of pointsArr) {
+            res.push({ x: p.x, y: p.y });
+        }
+        return res;
+    };
+
+    const lastSavedPoints = useRef<Point[]>(copyPointsArray(points));
 
     // Fixes weird bug where drag gets offset if dragged to invalid position
     const wasDragging = useRef<boolean>(false);
@@ -23,15 +55,36 @@ function Plot() {
 
     const { uploadEnergyGraph } = useContext(DataContext);
 
+    useEffect(() => {
+        if (lastSavedPoints.current.length !== points.length) {
+            console.log('Saving...');
+            uploadPointsToDB();
+            return;
+        }
+        if (lastSavedPoints.current.length === points.length) {
+            for (let i = 0; i < points.length; i++) {
+                if (lastSavedPoints.current[i].x !== points[i].x ||
+                    lastSavedPoints.current[i].y !== points[i].y
+                ) {
+                    console.log('Saving...');
+                    uploadPointsToDB();
+                    return;
+                }
+            }
+        }
+
+        // return () => { uploadPointsToDB(); clearInterval(interval) };
+    }, [points]);
+
     const getClosestValidXCoord = (x: number, okIndex: number | undefined = undefined): number => {
         if (okIndex === 0) return 0;
-        if (okIndex === points.length - 1) return 24;
+        if (okIndex === points.length - 1) return X_RANGE[1];
         x = Math.round(x);
-        if (x === 0 && !points.some((v) => v.x === 1)) return 1;
-        if (x === 24 && !points.some((v) => v.x === 23)) return 23;
+        if (x === X_RANGE[0] && !points.some((v) => v.x === X_RANGE[0])) return X_RANGE[0] + 1;
+        if (x === X_RANGE[1] && !points.some((v) => v.x === X_RANGE[1] - 1)) return X_RANGE[1] - 1;
         if (!points.some((v, i) => v.x === x && (i !== okIndex))) return x;
-        if (x !== 0 && !points.some((v) => v.x === x - 1)) return x - 1;
-        if (x !== 24 && !points.some((v) => v.x === x + 1)) return x + 1;
+        if (x !== X_RANGE[0] && !points.some((v) => v.x === x - 1)) return x - 1;
+        if (x !== X_RANGE[1] && !points.some((v) => v.x === x + 1)) return x + 1;
 
         return -1;
     };
@@ -41,10 +94,10 @@ function Plot() {
         final: boolean = true, wasDragged: boolean = false) => {
         if (x === undefined || y === undefined) return;
 
-        const newX = 24 * (x + dx - margin.left) / (WIDTH - margin.left - margin.right);
-        const newY = -10 * (y + dy - HEIGHT + margin.bottom) / (HEIGHT - margin.top - margin.bottom);
-        let clampedX = Math.max(0, Math.min(24, newX));
-        let clampedY = Math.max(0, Math.min(10, newY));
+        const newX = X_DIST * (x + dx - margin.left) / (WIDTH - margin.left - margin.right);
+        const newY = -Y_DIST * (y + dy - HEIGHT + margin.bottom) / (HEIGHT - margin.top - margin.bottom);
+        let clampedX = Math.max(X_RANGE[0], Math.min(X_RANGE[1], newX));
+        let clampedY = Math.max(Y_RANGE[0], Math.min(Y_RANGE[1], newY));
         if (final) {
             clampedX = Math.round(clampedX);
             clampedY = Math.round(clampedY);
@@ -54,6 +107,8 @@ function Plot() {
         if (clampedX !== -1) updated[index] = { x: Math.round(clampedX), y: Math.round(clampedY) };
         if (final) {
             updated.sort((a, b) => a.x - b.x);
+            if (index === 0) updated[updated.length - 1].y = updated[0].y;
+            else if (index === updated.length - 1) updated[0].y = updated[updated.length - 1].y
             setPoints(updated);
             if (wasDragged) {
                 wasDragging.current = false;
@@ -69,7 +124,24 @@ function Plot() {
 
     const uploadPointsToDB = () => {
         console.log(points);
-        uploadEnergyGraph?.(points);
+        if (points.length < 2 || points.length > X_DIST + 1) {
+            setErrors('Invalid number of points');
+            return;
+        }
+        else if (points.some((v) =>
+            v.x > X_RANGE[1] ||
+            v.x < X_RANGE[0] ||
+            v.y > Y_RANGE[1] ||
+            v.y < Y_RANGE[0])) {
+            setErrors('Invalid point coordinates');
+            return;
+        }
+        else {
+            // ...
+        }
+
+        lastSavedPoints.current = copyPointsArray(points);
+        uploadEnergyGraph?.(points, currDate || new Date());
     };
 
     const handleDoubleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -83,15 +155,15 @@ function Plot() {
 
         if (!svgPoint) return;
 
-        const newX = 24 * (svgPoint.x - margin.left) / (WIDTH - margin.left - margin.right);
-        const newY = -10 * (svgPoint.y - HEIGHT + margin.bottom) / (HEIGHT - margin.top - margin.bottom);
-        let clampedX = Math.round(Math.max(0, Math.min(24, newX)));
-        let clampedY = Math.round(Math.max(0, Math.min(10, newY)));
-        if (clampedX === 0 && points.some((v) => v.x === 0)) {
-            clampedX = 1;
+        const newX = X_DIST * (svgPoint.x - margin.left) / (WIDTH - margin.left - margin.right);
+        const newY = -Y_DIST * (svgPoint.y - HEIGHT + margin.bottom) / (HEIGHT - margin.top - margin.bottom);
+        let clampedX = Math.round(Math.max(X_RANGE[0], Math.min(X_RANGE[1], newX)));
+        let clampedY = Math.round(Math.max(Y_RANGE[0], Math.min(Y_RANGE[1], newY)));
+        if (clampedX === X_RANGE[0] && points.some((v) => v.x === X_RANGE[0])) {
+            clampedX = X_RANGE[0] + 1;
         }
-        if (clampedX === 24 && points.some((v) => v.x === 24)) {
-            clampedX = 23;
+        if (clampedX === X_RANGE[1] && points.some((v) => v.x === X_RANGE[1])) {
+            clampedX = X_RANGE[1] - 1;
         }
         if (points.some((v) => v.x === clampedX && v.y === clampedY)) {
             return;
@@ -134,8 +206,8 @@ function Plot() {
                 <XYChart
                     height={HEIGHT}
                     width={WIDTH}
-                    xScale={{ type: 'linear', domain: [0, 24] }}
-                    yScale={{ type: 'linear', domain: [0, 10] }}
+                    xScale={{ type: 'linear', domain: X_RANGE }}
+                    yScale={{ type: 'linear', domain: Y_RANGE }}
                     captureEvents={false}
                 >
                     <Axis orientation='bottom' />
@@ -165,8 +237,8 @@ function Plot() {
                         >
                             {({ dragStart, dragEnd, dragMove, isDragging, dx, dy }) => {
                                 if (isDragging) {
-                                    dx = dx * 24 / (WIDTH - margin.left - margin.right);
-                                    dy = dy * 10 / (HEIGHT - margin.top - margin.bottom);
+                                    dx = dx * X_DIST / (WIDTH - margin.left - margin.right);
+                                    dy = dy * Y_DIST / (HEIGHT - margin.top - margin.bottom);
                                 } else {
                                     dx = 0;
                                     dy = 0;
@@ -176,9 +248,9 @@ function Plot() {
                                 }
                                 const newX = point.x + dx - (isDragging ? dragOffset.current.x : 0);
                                 const newY = point.y - dy + (isDragging ? dragOffset.current.y : 0);
-                                const xPos = (newX / 24) * (WIDTH - margin.left - margin.right) + margin.left;
-                                const yPos = HEIGHT - margin.bottom - newY * (HEIGHT - margin.top - margin.bottom) / 10;
-                                
+                                const xPos = (newX / X_DIST) * (WIDTH - margin.left - margin.right) + margin.left;
+                                const yPos = HEIGHT - margin.bottom - newY * (HEIGHT - margin.top - margin.bottom) / Y_DIST;
+
                                 if (isDragging) {
                                     wasDragging.current = isDragging;
                                 }

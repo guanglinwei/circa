@@ -1,4 +1,4 @@
-import { addDoc, collection, getDocs, getFirestore, Timestamp } from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, getFirestore, query, setDoc, Timestamp, where } from "firebase/firestore";
 import { app } from "../../firebase";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import AuthContext from "./AuthContext";
@@ -22,8 +22,9 @@ const DataContext = createContext<{
     userData: GraphData[],
     loading: boolean,
     loadFirebaseUserData: (() => Promise<boolean>) | null,
-    uploadEnergyGraph: ((points: Point[]) => Promise<boolean>) | null,
-}>({ userData: [], loading: false, loadFirebaseUserData: null, uploadEnergyGraph: null });
+    uploadEnergyGraph: ((points: Point[], currDate: Date, replace?: boolean) => Promise<boolean>) | null,
+    getGraphForDate: ((date: Date) => Promise<GraphData | null>) | null
+}>({ userData: [], loading: false, loadFirebaseUserData: null, uploadEnergyGraph: null, getGraphForDate: null });
 
 export const DataProvider = ({ children, loadData = true }: { children: ReactNode, loadData: boolean }) => {
     const [userData, setUserData] = useState<GraphData[]>([]);
@@ -63,26 +64,92 @@ export const DataProvider = ({ children, loadData = true }: { children: ReactNod
             });
     };
 
-    const uploadEnergyGraph: (points: Point[]) => Promise<boolean> = (points) => {
+    const getGraphForDate = async (date: Date): Promise<GraphData | null> => {
         if (!user) return new Promise(() => false);
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const ref = collection(db, 'users', user?.uid, 'graphs');
+        const q = query(
+            ref,
+            where('created', '>=', Timestamp.fromDate(startOfDay)),
+            where('created', '<=', Timestamp.fromDate(endOfDay)),
+        );
+
         setLoading(true);
-        console.log('up')
-        return addDoc(collection(db, 'users', user?.uid, 'graphs'), {
-            points: points,
-            created: Timestamp.now()
-        })
-            .then(() => true)
-            .catch((err) => {
-                console.error(err);
-                return false;
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+        try {
+            console.log('Check if entry in this day exists')
+            const querySnap = await getDocs(q);
+            if (querySnap.empty) {
+                return null;
+            }
+            else {
+                const existingDoc = querySnap.docs[0];
+                return existingDoc.data() as GraphData;
+            }
+        }
+        catch (err) {
+            console.error(err);
+            return null;
+        }
+        finally {
+            setLoading(false);
+        }
     };
 
+    const uploadEnergyGraph: (points: Point[], currDate: Date, replace?: boolean) => Promise<boolean> =
+        async (points, currDate, replace = true) => {
+            if (!user) return new Promise(() => false);
+
+            const startOfDay = new Date(currDate);
+            startOfDay.setHours(0, 0, 0, 0);
+            const endOfDay = new Date(currDate);
+            endOfDay.setHours(23, 59, 59, 999);
+
+            const ref = collection(db, 'users', user?.uid, 'graphs');
+            const q = query(
+                ref,
+                where('created', '>=', Timestamp.fromDate(startOfDay)),
+                where('created', '<=', Timestamp.fromDate(endOfDay)),
+            );
+
+            setLoading(true);
+            try {
+                console.log('Check if entry in this day exists')
+                const querySnap = await getDocs(q);
+                if (querySnap.empty) {
+                    await addDoc(ref, {
+                        points: points,
+                        created: Timestamp.fromDate(currDate)
+                    });
+                    return true;
+                }
+                else if (replace) {
+                    const existingDoc = querySnap.docs[0];
+                    const ref = doc(db, 'users', user?.uid, 'graphs', existingDoc.id);
+                    await setDoc(ref, {
+                        points: points,
+                        created: Timestamp.fromDate(currDate)
+                    });
+
+                    return true;
+                }
+
+                return false;
+            }
+            catch (err) {
+                console.error(err);
+                return false
+            }
+            finally {
+                setLoading(false);
+            }
+        };
+
     return (
-        <DataContext.Provider value={{ userData, loading, loadFirebaseUserData, uploadEnergyGraph }}>
+        <DataContext.Provider value={{ userData, loading, loadFirebaseUserData, uploadEnergyGraph, getGraphForDate }}>
             {children}
         </DataContext.Provider>
     )

@@ -15,7 +15,7 @@ function Results() {
             <div>
                 {/* {userData ? userData.map((doc, i) => <div key={i}>
                 {doc.points.map((v) => <p>{v.x}, {v.y}</p>)}</div>) : <></>} */}
-                {userData ? <Plot /> : <></>}
+                {userData ? <Plot setErrors={() => {}} /> : <></>}
             </div>
         </div>
     );
