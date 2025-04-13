@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import Plot from "../components/Plot";
 import AuthContext, { } from "@/context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function EnergyForm() {
     const toDateString = (date: Date) => {
@@ -16,6 +16,7 @@ function EnergyForm() {
     const { user } = useContext(AuthContext);
     const [tryNavigateBack, setTryNavigateBack] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [greetingText, setGreetingText] = useState('');
     const [displayedText, setDisplayedText] = useState('');
@@ -52,7 +53,7 @@ function EnergyForm() {
     }, []);
 
     useEffect(() => {
-        if (tryNavigateBack && !user) navigate('/');
+        if (tryNavigateBack && !user && location.pathname !== '/') navigate('/');
         else { setTryNavigateBack(false); }
     }, [tryNavigateBack]);
 
