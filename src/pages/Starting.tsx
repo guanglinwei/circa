@@ -6,14 +6,14 @@ import AuthContext from "@/context/AuthContext";
 
 function Starting() {
   const [pageVisible, setPageVisible] = useState(false);
-  const { user, login, loading } = useContext(AuthContext);
+  const { user, login, loading, justSignedOut } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
 
   // If user is logged in and auth state has finished loading, redirect
   useEffect(() => {
     if (!user) setPageVisible(true);
-    if (!loading && user) {
+    if (!loading && user && !justSignedOut) {
         setPageVisible(false);
         setTimeout(() => {
             navigate("/home");
@@ -33,7 +33,7 @@ function Starting() {
   }, [location]);
 
   // Show loading spinner while Firebase is checking
-  if (loading || !pageVisible) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background text-muted-foreground">
         <Loader2 className="h-6 w-6 animate-spin" />

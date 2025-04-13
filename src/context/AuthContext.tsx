@@ -7,11 +7,13 @@ const AuthContext = createContext<{
     login: () => void;
     logout: () => void;
     loading: boolean; // ✅ Add this
+    justSignedOut: boolean;
   }>({
     user: null,
     login: () => {},
     logout: () => {},
     loading: true,
+    justSignedOut: false,
   });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -20,11 +22,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true); // ✅ loading state added
+    const [justSignedOut, setJustSignedOut] = useState(false);
   
     useEffect(() => {
       const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
         setUser(firebaseUser);
         setLoading(false); // ✅ auth has finished checking
+        if (firebaseUser === null) setJustSignedOut(true);
       });
   
       return () => unsubscribe();
@@ -41,11 +45,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   
     const logout = () => {
-      signOut(auth).catch((err) => console.error(err));
+      signOut(auth).then(() => setJustSignedOut(true)).catch((err) => console.error(err));
     };
+
+    // const logoutDone = () => {
+    //     setJustSignedOut(false);
+    // };
   
     return (
-      <AuthContext.Provider value={{ user, login, logout, loading }}>
+      <AuthContext.Provider value={{ user, login, logout, loading, justSignedOut }}>
         {children}
       </AuthContext.Provider>
     );
