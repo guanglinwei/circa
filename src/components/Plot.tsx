@@ -178,10 +178,10 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
 
     return (
         <>
-            <button onClick={() => {
+            <button className='rounded-md bg-gray-200 px-2 cursor-pointer' onClick={() => {
                 deleteAllGraphs?.();
             }}>Delete my data</button>
-            <button onClick={() => {
+            <button className='rounded-md bg-gray-200 px-2 cursor-pointer' onClick={() => {
                 uploadPointsToDB();
             }}>UPLOAD</button>
             <div className='select-none' onDoubleClick={handleDoubleClick}>
