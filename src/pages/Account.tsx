@@ -36,7 +36,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect } from "react"
 import AuthContext from "@/context/AuthContext"
 import DataContext from "@/context/DataContext"
 import { Timestamp } from "firebase/firestore"
@@ -44,23 +44,23 @@ import { Timestamp } from "firebase/firestore"
 function Account() {
     const { user, logout } = useContext(AuthContext);
     const { deleteAllGraphs, userData, loadFirebaseUserData } = useContext(DataContext);
-    const [deleting, setDeleting] = useState(false);
-    const [deleteButtonUsable, setDeleteButtonUsable] = useState(true);
+    // const [deleting, setDeleting] = useState(false);
+    // const [deleteButtonUsable, setDeleteButtonUsable] = useState(true);
 
     const navigate = useNavigate();
 
-    const initiateGraphDeletion = () => {
-        if (!deleting) {
-            setDeleting(true);
-        } else {
-            if (!deleteButtonUsable) return;
-            setDeleteButtonUsable(false);
-            deleteAllGraphs?.().finally(() => {
-                setDeleting(false);
-                setDeleteButtonUsable(true);
-            });
-        }
-    };
+    // const initiateGraphDeletion = () => {
+    //     if (!deleting) {
+    //         setDeleting(true);
+    //     } else {
+    //         if (!deleteButtonUsable) return;
+    //         setDeleteButtonUsable(false);
+    //         deleteAllGraphs?.().finally(() => {
+    //             setDeleting(false);
+    //             setDeleteButtonUsable(true);
+    //         });
+    //     }
+    // };
     const handleLogout = async () => {
         try {
             await logout(); // Sign out
@@ -90,8 +90,8 @@ function Account() {
         <div>
             <Tabs defaultValue="account" className="w-[400px]">
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="account">Account</TabsTrigger>
-                    <TabsTrigger value="data">Data</TabsTrigger>
+                    <TabsTrigger value="account" className="cursor-pointer">Account</TabsTrigger>
+                    <TabsTrigger value="data" className="cursor-pointer">Data</TabsTrigger>
                 </TabsList>
                 <TabsContent value="account">
                     <Card>
@@ -114,7 +114,7 @@ function Account() {
                         <CardFooter className="flex justify-between items-center w-full mt-4">
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button variant="destructive">Delete Data</Button>
+                                    <Button variant="destructive" className="cursor-pointer">Delete Data</Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
@@ -127,17 +127,17 @@ function Account() {
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
                                         <AlertDialogAction
-                                            className="bg-destructive hover:bg-destructive/90"
-                                            onClick={initiateGraphDeletion}
+                                            className="cursor-pointer bg-destructive hover:bg-destructive/90"
+                                            onClick={() => deleteAllGraphs?.()}
                                         >
                                             Continue
                                         </AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
-                            <Button className="" onClick={handleLogout}>
+                            <Button className="cursor-pointer" onClick={handleLogout}>
                                 Sign Out
                             </Button>
                         </CardFooter>
