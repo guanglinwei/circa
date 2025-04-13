@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
@@ -6,16 +6,25 @@ import {
     CardFooter,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
-import { Link } from "react-router-dom"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+import { useNavigate } from "react-router-dom";
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-} from "@/components/ui/tabs"
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 import {
     Table,
@@ -38,14 +47,26 @@ function Account() {
     const [deleting, setDeleting] = useState(false);
     const [deleteButtonUsable, setDeleteButtonUsable] = useState(true);
 
+    const navigate = useNavigate();
+
     const initiateGraphDeletion = () => {
         if (!deleting) {
             setDeleting(true);
-        }
-        else {
+        } else {
             if (!deleteButtonUsable) return;
             setDeleteButtonUsable(false);
-            deleteAllGraphs?.().finally(() => { setDeleting(false); setDeleteButtonUsable(true) });
+            deleteAllGraphs?.().finally(() => {
+                setDeleting(false);
+                setDeleteButtonUsable(true);
+            });
+        }
+    };
+    const handleLogout = async () => {
+        try {
+            await logout(); // Sign out
+            navigate("/"); // Redirect to starting page
+        } catch (error) {
+            console.error("Logout failed:", error);
         }
     };
 
@@ -62,7 +83,7 @@ function Account() {
     const timestampToDate = (ts: Timestamp) => {
         const pad = (n: number) => String(n).padStart(2, '0');
         const date = ts.toDate();
-        return `${date.getFullYear()}/${pad(date.getMonth()+1)}/${date.getDate()}`;
+        return `${date.getFullYear()}/${pad(date.getMonth() + 1)}/${date.getDate()}`;
     };
 
     return (
@@ -80,28 +101,45 @@ function Account() {
                                 Make changes to your account here.
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-2">
-                            <div className="space-y-1 flex items-center">
-                                {user?.photoURL ? (
-                                    <img className="rounded-full border-foreground border-2" src={user?.photoURL}
-                                        height={80} width={80}
-                                        referrerPolicy="no-referrer" />
-                                ) : (
-                                    <img src='/circa/profile.svg' height={80} width={80} />
-                                )}
+                        <CardContent className="flex flex-col items-center mt-2">
+                            <div className="flex flex-row space-x-4 items-center w-full">
+                                <Avatar>
+                                    <AvatarImage src={user?.photoURL} alt="userimg" />
+                                    <AvatarFallback><img src='/circa/profile.svg' height={40} width={40} /></AvatarFallback>
+                                </Avatar>
 
-                                <div className="flex flex-col align-middle text-center">
-                                    <div className="align-middle">{user?.displayName}</div>
-                                </div>
-
-                            </div>
-                            <div className="space-y-1">
+                                <div>{user?.displayName}</div>
                             </div>
                         </CardContent>
-                        <CardFooter className="flex justify-between items-center w-full">
-                            <Link to="/"><Button variant="outline">Back</Button></Link>
-                            <Button variant="destructive" onClick={initiateGraphDeletion}>{deleting ? 'Click again to confirm' : 'Delete Data'}</Button>
-                            <Button className="" onClick={logout}>Sign Out</Button>
+                        <CardFooter className="flex justify-between items-center w-full mt-4">
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="destructive">Delete Data</Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>
+                                            Are you absolutely sure?
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action cannot be undone. This will permanently remove
+                                            your data from our servers and reset your cycle.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                            className="bg-destructive hover:bg-destructive/90"
+                                            onClick={initiateGraphDeletion}
+                                        >
+                                            Continue
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                            <Button className="" onClick={handleLogout}>
+                                Sign Out
+                            </Button>
                         </CardFooter>
                     </Card>
                 </TabsContent>
