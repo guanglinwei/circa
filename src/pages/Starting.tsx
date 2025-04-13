@@ -14,7 +14,7 @@ function Starting() {
 
     return (
         <div className={`min-h-screen flex flex-col items-center pt-[25vh] ${pageVisible ? 'opacity-100' : 'opacity-0'} transition-opacity duration-600`}>
-            <h1 style={{ fontSize: '200px', fontFamily: "Jacques Francois" }}>Circa.</h1>
+            <h1 style={{ fontSize: '175px', fontFamily: "Jacques Francois" }}>Circa.</h1>
             <div className="mt-25"></div>
             <Link to="/home"><Button variant="starting" className="cursor-pointer bg-stone-600 w-50" onClick={login}>Get Started</Button></Link>
         </div>
