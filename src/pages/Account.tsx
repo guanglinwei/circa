@@ -104,7 +104,7 @@ function Account() {
                         <CardContent className="flex flex-col items-center mt-2">
                             <div className="flex flex-row space-x-4 items-center w-full">
                                 <Avatar>
-                                    <AvatarImage src={user?.photoURL} alt="userimg" />
+                                    <AvatarImage src={user?.photoURL || undefined} alt="userimg" />
                                     <AvatarFallback><img src='/circa/profile.svg' height={40} width={40} /></AvatarFallback>
                                 </Avatar>
 
