@@ -180,7 +180,7 @@ function Account({ open, onClose }: { open: boolean; onClose: () => void }) {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {userData.map(({ points, created }, i) =>
+                            {userData.sort((a, b) => b.created.toMillis() - a.created.toMillis()).map(({ points, created }, i) =>
                                 i < 10 ? (
                                     <TableRow key={i}>
                                         <TableCell className="font-medium text-left">
