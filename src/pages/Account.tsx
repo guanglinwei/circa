@@ -8,6 +8,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 
+import {Link} from "react-router-dom"
+
 import {
   Tabs,
   TabsContent,
@@ -94,7 +96,7 @@ function Account() {
             </div>
           </CardContent>
           <CardFooter className="flex justify-between items-center w-full">
-            <Button variant= "outline">Back</Button>
+            <Link to="/"><Button variant= "outline">Back</Button></Link>
   <Button variant="destructive">Delete Data</Button>
   <Button className="">Sign Out</Button>
 </CardFooter>
