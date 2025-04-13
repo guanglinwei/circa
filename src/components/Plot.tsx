@@ -331,7 +331,6 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
                                 }
                                 const newX = point.x + dx - (isDragging ? dragOffset.current.x : 0);
                                 const newY = point.y - dy + (isDragging ? dragOffset.current.y : 0);
-                                console.log(newY)
                                 const xPos = (newX / X_DIST) * (WIDTH - margin.left - margin.right) + margin.left;
                                 const yPos = HEIGHT - margin.bottom - newY * (HEIGHT - margin.top - margin.bottom) / Y_DIST;
 
