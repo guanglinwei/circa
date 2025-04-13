@@ -27,58 +27,14 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { useContext, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import AuthContext from "@/context/AuthContext"
 import DataContext from "@/context/DataContext"
-
-const invoices = [
-    {
-        invoice: "INV001",
-        paymentStatus: "Paid",
-        totalAmount: "$250.00",
-        paymentMethod: "Credit Card",
-    },
-    {
-        invoice: "INV002",
-        paymentStatus: "Pending",
-        totalAmount: "$150.00",
-        paymentMethod: "PayPal",
-    },
-    {
-        invoice: "INV003",
-        paymentStatus: "Unpaid",
-        totalAmount: "$350.00",
-        paymentMethod: "Bank Transfer",
-    },
-    {
-        invoice: "INV004",
-        paymentStatus: "Paid",
-        totalAmount: "$450.00",
-        paymentMethod: "Credit Card",
-    },
-    {
-        invoice: "INV005",
-        paymentStatus: "Paid",
-        totalAmount: "$550.00",
-        paymentMethod: "PayPal",
-    },
-    {
-        invoice: "INV006",
-        paymentStatus: "Pending",
-        totalAmount: "$200.00",
-        paymentMethod: "Bank Transfer",
-    },
-    {
-        invoice: "INV007",
-        paymentStatus: "Unpaid",
-        totalAmount: "$300.00",
-        paymentMethod: "Credit Card",
-    },
-]
+import { Timestamp } from "firebase/firestore"
 
 function Account() {
     const { user, logout } = useContext(AuthContext);
-    const { deleteAllGraphs } = useContext(DataContext);
+    const { deleteAllGraphs, userData, loadFirebaseUserData } = useContext(DataContext);
     const [deleting, setDeleting] = useState(false);
     const [deleteButtonUsable, setDeleteButtonUsable] = useState(true);
 
@@ -91,6 +47,22 @@ function Account() {
             setDeleteButtonUsable(false);
             deleteAllGraphs?.().finally(() => { setDeleting(false); setDeleteButtonUsable(true) });
         }
+    };
+
+    useEffect(() => {
+        loadFirebaseUserData?.();
+    }, []);
+
+    const timestampToTime = (ts: Timestamp) => {
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const date = ts.toDate();
+        return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    };
+
+    const timestampToDate = (ts: Timestamp) => {
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const date = ts.toDate();
+        return `${date.getFullYear()}/${pad(date.getMonth()+1)}/${date.getDate()}`;
     };
 
     return (
@@ -135,22 +107,20 @@ function Account() {
                 </TabsContent>
                 <TabsContent value="data">
                     <Table>
-                        <TableCaption>A list of your recent data.</TableCaption>
+                        <TableCaption>A list of your recent energy levels.</TableCaption>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[100px]">Date</TableHead>
-                                <TableHead>Time</TableHead>
-                                <TableHead className="text-right">X</TableHead>
-                                <TableHead className="text-right">Y</TableHead>
+                                <TableHead className="w-40">Date <span className="text-gray-500 font-normal text-xs"> YYYY/MM/DD</span></TableHead>
+                                <TableHead className="text-left">Time</TableHead>
+                                <TableHead className="text-right">Daily Average</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {invoices.map((invoice) => (
-                                <TableRow key={invoice.invoice}>
-                                    <TableCell className="font-medium">{invoice.invoice}</TableCell>
-                                    <TableCell>{invoice.paymentStatus}</TableCell>
-                                    <TableCell>{invoice.paymentMethod}</TableCell>
-                                    <TableCell className="text-right">{invoice.totalAmount}</TableCell>
+                            {userData.map(({ points, created }, i) => (
+                                <TableRow key={i}>
+                                    <TableCell className="font-medium text-left">{timestampToDate(created)}</TableCell>
+                                    <TableCell className="text-left">{timestampToTime(created)}</TableCell>
+                                    <TableCell className="text-right">{(points.reduce((sum, point) => sum + point.y, 0) / points.length).toFixed(2)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

@@ -25,6 +25,7 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
 
     const { userData, deleteAllGraphs } = useContext(DataContext);
     const [averagePoints, setAveragePoints] = useState<Point[]>([]);
+    const [currentHoverIndex, setCurrentHoverIndex] = useState<number | null>(null);
     // const prevDate = useRef<Date | null>(null);
 
     // useEffect(() => {
@@ -97,6 +98,7 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
                 wasDragging.current = false;
                 dragOffset.current = { x: 0, y: 0 };
             }
+            setCurrentHoverIndex(null);
         }
     };
 
@@ -240,9 +242,9 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
                             </div>
                         </div>
                         <div className="flex flex-col w-24">
-                            <div className="my-[14px] mt-[16px]"><hr className="w-16"/></div>
-                            <div className="my-[15px]"><hr className="w-16"/></div>
-                            <div className="my-[14px]"><hr className="w-16"/></div>
+                            <div className="my-[14px] mt-[16px]"><hr className="w-16" /></div>
+                            <div className="my-[15px]"><hr className="w-16" /></div>
+                            <div className="my-[14px]"><hr className="w-16" /></div>
                         </div>
                         <div className="flex flex-col">
                             <div className="ml-7 my-[5px] font-semibold">Move</div>
@@ -288,18 +290,19 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
                     </defs>
                     <Axis orientation='bottom' label='Time of Day' />
                     <Axis orientation='left' label='Energy Level' />
-                    <AnimatedLineSeries
-                        dataKey='Line'
-                        data={points}
-                        {...accessors}
-                        curve={curveMonotoneX}
-                    />
 
                     <AnimatedLineSeries
                         dataKey='AvgLine'
                         data={averagePoints}
                         {...accessors}
                         curve={curveMonotoneX} />
+
+                    <AnimatedLineSeries
+                        dataKey='Line'
+                        data={points}
+                        {...accessors}
+                        curve={curveMonotoneX}
+                    />
 
                     {points.map((point, i) => (
                         <Drag
@@ -343,7 +346,7 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
                                         key={`dot-${i}`}
                                         cx={xPos}
                                         cy={yPos}
-                                        r={isDragging ? 8 : 6}
+                                        r={isDragging ? 8 : ((currentHoverIndex === i) ? 8 : 6)}
                                         // fill={isDragging ? 'blue' : 'blue'}
                                         fill={rgbToHex(lerpThreeRGB(
                                             { r: 162, g: 215, b: 216 },
@@ -357,6 +360,8 @@ function Plot({ setErrors, currDate }: { setErrors: (err: string) => void, currD
                                         onTouchStart={dragStart}
                                         onTouchMove={dragMove}
                                         onTouchEnd={dragEnd}
+                                        onMouseEnter={() => setCurrentHoverIndex(i)}
+                                        onMouseLeave={() => setCurrentHoverIndex(null)}
                                         // style={{ transition: 'fill 0.1s ease-in-out' }}
                                         filter='url(#glow)'
                                     ></Circle>
