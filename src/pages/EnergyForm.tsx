@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import Plot from "../components/Plot";
+import AuthContext, { } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 function EnergyForm() {
     const toDateString = (date: Date) => {
@@ -10,14 +12,26 @@ function EnergyForm() {
     const [now, setNow] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<string>(toDateString(now));
     const [errors, setErrors] = useState('');
+    const { user } = useContext(AuthContext);
+    const [tryNavigateBack, setTryNavigateBack] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const interval = setInterval(() => {
             setNow(new Date());
         }, 1000);
 
-        return () => clearInterval(interval);
+        const timeout = setTimeout(() => {
+            setTryNavigateBack(true);
+        }, 3000);
+
+        return () => { clearInterval(interval); clearTimeout(timeout) };
     }, []);
+
+    useEffect(() => {
+        if (tryNavigateBack && !user) navigate('/');
+        else { setTryNavigateBack(false); }
+    }, [tryNavigateBack]);
 
     const isSelectedDateToday = useCallback(() => {
         return toDateString(now) === selectedDate;
@@ -36,8 +50,9 @@ function EnergyForm() {
     };
 
     return (
-        <div>
-            <h1>Energy Graph</h1>
+        <div className={`${user ? 'opacity-100' : 'opacity-0'} transition-opacity`}>
+            <h1>{user?.displayName ? `Hello ${user?.displayName?.split(' ')[0]}` : 'Welcome to Circa'}</h1>
+            <div>How are you doing today?</div>
             <div className='m-2 p-2' style={{ display: 'none' }}>
                 {/* <span>🗓️ </span> */}
                 {/* <span>{now.toLocaleString(undefined, {
@@ -46,15 +61,15 @@ function EnergyForm() {
                 })}</span> */}
                 <div className='flex align-middle justify-center items-center'>
                     <span className='px-1 cursor-pointer bg-gray-100 rounded-md'
-                    onClick={() => setSelectedDate((old) => getDateWithOffset(old, -1))}>&lt;&lt;</span>
+                        onClick={() => setSelectedDate((old) => getDateWithOffset(old, -1))}>&lt;&lt;</span>
                     <span className='rounded-md bg-gray-100 p-1 pb-2 mr-1 inline-block w-fit min-w-36 cursor-pointer'
                         onClick={() => setSelectedDate(toDateString(now))}>
                         <span className='w-[100px]'>{isSelectedDateToday() ? '🕒 Today' : '🕒 Back to today'}</span>
                     </span>
                     <input type='date' value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} />
-                    
+
                     <span className='px-1 cursor-pointer bg-gray-100 rounded-md'
-                    onClick={() => setSelectedDate((old) => getDateWithOffset(old, 1))}>&gt;&gt;</span>
+                        onClick={() => setSelectedDate((old) => getDateWithOffset(old, 1))}>&gt;&gt;</span>
                 </div>
             </div>
             <p className={(!!errors ? 'visible' : 'invisible') + (' text-red-500 mb-1 font-semibold')}>{errors || '.'}</p>
