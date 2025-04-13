@@ -34,9 +34,6 @@ export const DataProvider = ({ children, loadData = true }: { children: ReactNod
     const { user } = useContext(AuthContext);
 
     useEffect(() => {
-        console.log('HERE')
-        console.log(loadData)
-        console.log(user)
         if (!loadData) return;
         if (!user) {
             setUserData([]);

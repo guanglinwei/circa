@@ -1,18 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import AuthContext from "@/context/AuthContext";
 
 function Starting() {
   const [pageVisible, setPageVisible] = useState(false);
   const { user, login, loading } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // If user is logged in and auth state has finished loading, redirect
   useEffect(() => {
     if (!loading && user) {
-      navigate("/home");
+        setPageVisible(false);
+        setTimeout(() => {
+            navigate("/home");
+
+        }, 500)
     }
   }, [user, loading, navigate]);
 
@@ -20,6 +25,11 @@ function Starting() {
   useEffect(() => {
     setPageVisible(true);
   }, []);
+
+  useEffect(() => {
+    // console.log(location.pathname)
+    // setPageVisible(location.pathname === '/');
+  }, [location]);
 
   // Show loading spinner while Firebase is checking
   if (loading) {

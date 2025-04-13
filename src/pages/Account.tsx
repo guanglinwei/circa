@@ -77,7 +77,7 @@ function Account({ open, onClose }: { open: boolean; onClose: () => void }) {
             className: "text-left",
         });
 
-        handleLogout(); // your original logout function
+        handleLogout().then(() => onClose()); // your original logout function
     };
 
     useEffect(() => {
