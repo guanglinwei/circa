@@ -96,10 +96,10 @@ function Account() {
             </div>
           </CardContent>
           <CardFooter className="flex justify-between items-center w-full">
-            <Link to="/"><Button variant= "outline">Back</Button></Link>
   <Button variant="destructive">Delete Data</Button>
   <Button className="">Sign Out</Button>
 </CardFooter>
+
         </Card>
       </TabsContent>
       <TabsContent value="data">
@@ -131,6 +131,7 @@ function Account() {
     
       </TabsContent>
     </Tabs>
+    <Link to="/"><Button variant= "outline" className="w-[400px] mt-5">Back</Button></Link>
         </div>
     );
 }
