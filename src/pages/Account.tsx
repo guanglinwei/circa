@@ -1,4 +1,6 @@
+"use client";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
     Card,
     CardContent,
@@ -10,7 +12,7 @@ import {
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -35,13 +37,13 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table"
-import { useContext, useEffect } from "react"
-import AuthContext from "@/context/AuthContext"
-import DataContext from "@/context/DataContext"
-import { Timestamp } from "firebase/firestore"
+} from "@/components/ui/table";
+import { useContext, useEffect } from "react";
+import AuthContext from "@/context/AuthContext";
+import DataContext from "@/context/DataContext";
+import { Timestamp } from "firebase/firestore";
 
-function Account() {
+function Account({ open, onClose }: { open: boolean; onClose: () => void }) {
     const { user, logout } = useContext(AuthContext);
     const { deleteAllGraphs, userData, loadFirebaseUserData } = useContext(DataContext);
     // const [deleting, setDeleting] = useState(false);
@@ -69,26 +71,45 @@ function Account() {
             console.error("Logout failed:", error);
         }
     };
+    const handleLogoutWithToast = () => {
+        toast("Successfully Signed Out!", {
+            description: "See you soon 👋",
+            className: "text-left",
+        });
+
+        handleLogout(); // your original logout function
+    };
 
     useEffect(() => {
-        loadFirebaseUserData?.();
-    }, []);
+        console.log(open)
+        if (open) {
+            // console.log(user)
+            // console.log(userData)
+            loadFirebaseUserData?.();
+        }
+    }, [open]);
+
+    // useEffect(() => {
+    //     console.log(userData);
+    // }, [userData])
 
     const timestampToTime = (ts: Timestamp) => {
-        const pad = (n: number) => String(n).padStart(2, '0');
+        const pad = (n: number) => String(n).padStart(2, "0");
         const date = ts.toDate();
         return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
     };
 
     const timestampToDate = (ts: Timestamp) => {
-        const pad = (n: number) => String(n).padStart(2, '0');
+        const pad = (n: number) => String(n).padStart(2, "0");
         const date = ts.toDate();
-        return `${date.getFullYear()}/${pad(date.getMonth() + 1)}/${date.getDate()}`;
+        return `${date.getFullYear()}/${pad(
+            date.getMonth() + 1
+        )}/${date.getDate()}`;
     };
 
     return (
         <div>
-            <Tabs defaultValue="account" className="w-[400px]">
+            <Tabs defaultValue="account" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="account" className="cursor-pointer">Account</TabsTrigger>
                     <TabsTrigger value="data" className="cursor-pointer">Data</TabsTrigger>
@@ -104,8 +125,13 @@ function Account() {
                         <CardContent className="flex flex-col items-center mt-2">
                             <div className="flex flex-row space-x-4 items-center w-full">
                                 <Avatar>
-                                    <AvatarImage src={user?.photoURL || undefined} alt="userimg" />
-                                    <AvatarFallback><img src='/circa/profile.svg' height={40} width={40} /></AvatarFallback>
+                                    <AvatarImage
+                                        src={user?.photoURL || undefined}
+                                        alt="userimg"
+                                    />
+                                    <AvatarFallback>
+                                        <img src="/circa/profile.svg" height={40} width={40} />
+                                    </AvatarFallback>
                                 </Avatar>
 
                                 <div>{user?.displayName}</div>
@@ -123,7 +149,7 @@ function Account() {
                                         </AlertDialogTitle>
                                         <AlertDialogDescription>
                                             This action cannot be undone. This will permanently remove
-                                            your data from our servers and reset your cycle.
+                                            your data from our server and reset your cycle.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
@@ -137,7 +163,7 @@ function Account() {
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
-                            <Button className="cursor-pointer" onClick={handleLogout}>
+                            <Button className="cursor-pointer" onClick={handleLogoutWithToast}>
                                 Sign Out
                             </Button>
                         </CardFooter>
@@ -154,27 +180,41 @@ function Account() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {userData.map(({ points, created }, i) => ( (i < 10) ?
-                                <TableRow key={i}>
-                                    <TableCell className="font-medium text-left">{timestampToDate(created)}</TableCell>
-                                    <TableCell className="text-left">{timestampToTime(created)}</TableCell>
-                                    <TableCell className="text-right">{(points.reduce((sum, point) => sum + point.y, 0) / points.length).toFixed(2)}</TableCell>
-                                </TableRow> : <></>
-                            ))}
+                            {userData.map(({ points, created }, i) =>
+                                i < 10 ? (
+                                    <TableRow key={i}>
+                                        <TableCell className="font-medium text-left">
+                                            {timestampToDate(created)}
+                                        </TableCell>
+                                        <TableCell className="text-left">
+                                            {timestampToTime(created)}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            {(
+                                                points.reduce((sum, point) => sum + point.y, 0) /
+                                                points.length
+                                            ).toFixed(2)}
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    <></>
+                                )
+                            )}
                         </TableBody>
-                        <TableFooter>
-
-                        </TableFooter>
-
+                        <TableFooter></TableFooter>
                     </Table>
-
                 </TabsContent>
 
-                <Link to="/" className="mt-5">
-                    <Button variant="outline" className="w-full cursor-pointer">Back</Button>
-                </Link>
+                <Button
+                    variant="outline"
+                    onClick={onClose}
+                    className="w-full cursor-pointer mt-1"
+                >
+                    Back
+                </Button>
             </Tabs>
         </div>
+
     );
 }
 

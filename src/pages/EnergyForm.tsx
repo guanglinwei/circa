@@ -34,7 +34,7 @@ function EnergyForm() {
 
     useEffect(() => {
         if (!user || !user.displayName) return ///setGreetingText('Welcome to Circa');
-        else setGreetingText(`Hello ${user?.displayName?.split(' ')[0]}`);
+        else setGreetingText(`Hello ${user?.displayName?.split(' ')[0]}!`);
     }, [user]);
 
     useEffect(() => {
