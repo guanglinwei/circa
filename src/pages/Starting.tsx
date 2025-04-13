@@ -33,7 +33,7 @@ function Starting() {
   }, [location]);
 
   // Show loading spinner while Firebase is checking
-  if (loading) {
+  if (loading || !pageVisible) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background text-muted-foreground">
         <Loader2 className="h-6 w-6 animate-spin" />
