@@ -14,11 +14,11 @@ function Starting() {
   useEffect(() => {
     if (!user) setPageVisible(true);
     if (!loading && user && !justSignedOut) {
-        setPageVisible(false);
-        setTimeout(() => {
-            navigate("/home");
-            setPageVisible(true);
-        }, 500)
+      setPageVisible(false);
+      setTimeout(() => {
+        navigate("/home");
+        setPageVisible(true);
+      }, 500);
     }
   }, [user, loading, navigate]);
 
